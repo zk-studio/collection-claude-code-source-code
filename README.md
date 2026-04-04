@@ -79,7 +79,7 @@ Nano Claude Code: **A Lightweight** and **Easy-to-Use** Python Reimplementation 
 
 Claude Code is a powerful, production-grade AI coding assistant — but its source code is a compiled, 12 MB TypeScript/Node.js bundle (~1,300 files, ~283K lines). It is tightly coupled to the Anthropic API, hard to modify, and impossible to run against a local or alternative model.
 
-**Nano Claude Code** reimplements the same core loop in ~10K lines of readable Python, keeping everything you need and dropping what you don't.
+**Nano Claude Code** reimplements the same core loop in ~10K lines of readable Python, keeping everything you need and dropping what you don't. See here for more detailed analysis (Nano Claude code v3.03), [English version](https://github.com/SafeRL-Lab/nano-claude-code/blob/main/docs/comparison_claude_code_vs_nano_v3.03_en.md) and [Chinese version](https://github.com/SafeRL-Lab/nano-claude-code/blob/main/docs/comparison_claude_code_vs_nano_v3.03_cn.md)
 
 ### At a glance
 
