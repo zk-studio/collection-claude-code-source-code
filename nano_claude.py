@@ -91,7 +91,7 @@ except ImportError:
     _RICH = False
     console = None
 
-VERSION = "3.05.2"
+VERSION = "3.05.5"
 
 # ── ANSI helpers (used even with rich for non-markdown output) ─────────────
 C = {
@@ -1433,16 +1433,27 @@ def cmd_voice(args: str, state, config) -> bool:
 
 def cmd_image(args: str, state, config) -> Union[bool, tuple]:
     """Grab image from clipboard and send to vision model with optional prompt."""
+    import sys as _sys
     try:
         from PIL import ImageGrab
         import io, base64
     except ImportError:
-        err("Pillow is required for /image. Install with: pip install Pillow")
+        err("Pillow is required for /image. Install with: pip install nano-claude-code[vision]")
+        if _sys.platform == "linux":
+            err("On Linux, clipboard support also requires xclip: sudo apt install xclip")
         return True
 
     img = ImageGrab.grabclipboard()
     if img is None:
-        err("No image found in clipboard. Copy an image first (e.g. Win+Shift+S)")
+        if _sys.platform == "linux":
+            err("No image found in clipboard. On Linux, xclip is required (sudo apt install xclip). "
+                "Copy an image with Flameshot, GNOME Screenshot, or: xclip -selection clipboard -t image/png -i file.png")
+        elif _sys.platform == "darwin":
+            err("No image found in clipboard. Copy an image first "
+                "(Cmd+Ctrl+Shift+4 captures a screenshot region to clipboard).")
+        else:
+            err("No image found in clipboard. Copy an image first "
+                "(Win+Shift+S captures a screenshot region to clipboard).")
         return True
 
     # Convert to base64 PNG

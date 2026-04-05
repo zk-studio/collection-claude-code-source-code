@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nano-claude-code"
-version = "3.05.4"
+version = "3.05.5"
 description = "Minimal Python implementation of Claude Code"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -17,7 +17,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-voice = ["sounddevice"]
+voice  = ["sounddevice"]
+vision = ["Pillow"]
 
 [project.scripts]
 nano_claude = "nano_claude:main"

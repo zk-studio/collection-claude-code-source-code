@@ -275,15 +275,21 @@ def messages_to_anthropic(messages: list) -> list:
     return result
 
 
-def messages_to_openai(messages: list) -> list:
-    """Convert neutral messages → OpenAI API format."""
+def messages_to_openai(messages: list, pass_images: bool = False) -> list:
+    """Convert neutral messages → OpenAI API format.
+
+    Args:
+        pass_images: if True, forward the 'images' list in user messages
+                     (Ollama /api/chat native format). Must be False for
+                     OpenAI/Gemini/Qwen/etc. which use a different image schema.
+    """
     result = []
     for m in messages:
         role = m["role"]
 
         if role == "user":
             msg_out = {"role": "user", "content": m["content"]}
-            if m.get("images"):
+            if pass_images and m.get("images"):
                 msg_out["images"] = m["images"]
             result.append(msg_out)
 
@@ -496,8 +502,9 @@ def stream_ollama(
 ) -> Generator:
     import urllib.request
     import json
-    
-    oai_messages = [{"role": "system", "content": system}] + messages_to_openai(messages)
+
+    # pass_images=True: Ollama /api/chat accepts base64 images natively in the message
+    oai_messages = [{"role": "system", "content": system}] + messages_to_openai(messages, pass_images=True)
     
     # Ollama requires tool arguments as dict objects, not strings. OpenAI uses strings.
     for m in oai_messages:

@@ -30,6 +30,7 @@ English | [中文](https://github.com/SafeRL-Lab/nano-claude-code/blob/main/docs
 
 ## 🔥🔥🔥 News (Pacific Time)
 
+- Apr 05, 2026: **v3.05.5** — Native vision support for local Ollama models (`llava`, `gemma4`, `llama3.2-vision`): new `/image [prompt]` command captures the current clipboard image, encodes it to Base64, and attaches it to the next prompt. Also adds multi-line paste detection (`_read_input`) so pasted text is submitted as a single turn rather than multiple queries. Install Pillow with `pip install nano-claude-code[vision]`; Linux users also need `xclip` (`sudo apt install xclip`).
 - Apr 05, 2026: **Enhanced Memory System** — added `confidence` / `source` / `last_used_at` / `conflict_group` metadata to every memory entry; conflict detection on `MemorySave` warns before overwriting; `MemorySearch` re-ranks results by `confidence × recency` (30-day decay) and updates `last_used_at` on hits; new `/memory consolidate` command runs a lightweight AI analysis of the current session and auto-saves up to 3 long-term insights (user preferences, feedback corrections, project decisions) at 0.8 confidence — never overwrites higher-confidence user memories.
 
 - 02:16 PM, Apr 05, 2026: **Reasoning, Rendering, and Packaging Improvements**
@@ -143,6 +144,7 @@ Claude Code is a powerful, production-grade AI coding assistant — but its sour
 - **Proactive background monitoring** — `/proactive 5m` activates a sentinel daemon that wakes the agent automatically after a period of inactivity, enabling continuous monitoring loops, scheduled checks, or trading bots without user prompts.
 - **Rich Live streaming rendering** — When `rich` is installed, responses stream as live-updating Markdown in place (no duplicate raw text), with clean tool-call interleaving.
 - **Native Ollama reasoning** — Local reasoning models (deepseek-r1, qwen3, gemma4) stream their `<think>` tokens directly to the terminal via `ThinkingChunk` events; enable with `/verbose` and `/thinking`.
+- **Native Ollama vision** — `/image [prompt]` captures the clipboard and sends it to local vision models (llava, gemma4, llama3.2-vision) via Ollama's native image API. No cloud required.
 
 ### Key design differences
 
@@ -191,6 +193,7 @@ Claude Code is a powerful, production-grade AI coding assistant — but its sour
 | Permission system | `auto` / `accept-all` / `manual` modes |
 | 19 slash commands | `/model` · `/config` · `/save` · `/cost` · `/memory` · `/skills` · `/agents` · `/voice` · `/proactive` · … |
 | Voice input | Record → transcribe → auto-submit. Backends: `sounddevice` / `arecord` / SoX + `faster-whisper` / `openai-whisper` / OpenAI API. Works fully offline. |
+| Vision input | `/image [prompt]` captures the clipboard image and sends it to a local vision model (Ollama `llava`, `gemma4`, `llama3.2-vision`). Requires `pip install nano-claude-code[vision]`; Linux also needs `xclip`. |
 | Proactive monitoring | `/proactive [duration]` starts a background sentinel daemon; agent wakes automatically after inactivity, enabling continuous monitoring loops without user prompts |
 | Rich Live streaming | When `rich` is installed, responses render as live-updating Markdown in place — no duplicate raw text, clean tool-call interleaving |
 | Context injection | Auto-loads `CLAUDE.md`, git status, cwd, persistent memory |
@@ -246,6 +249,8 @@ Claude Code is a powerful, production-grade AI coding assistant — but its sour
 | `phi4` | 14B | Microsoft, strong reasoning | `ollama pull phi4` |
 | `gemma3` | 4B / 12B / 27B | Google open model | `ollama pull gemma3` |
 | `codellama` | 7B / 34B | Code generation | `ollama pull codellama` |
+| `llava` | 7B / 13B | **Vision** — image understanding | `ollama pull llava` |
+| `llama3.2-vision` | 11B | **Vision** — multimodal reasoning | `ollama pull llama3.2-vision` |
 
 > **Note:** Tool calling requires a model that supports function calling. Recommended local models: `qwen2.5-coder`, `llama3.3`, `mistral`, `phi4`.
 
@@ -654,6 +659,7 @@ Type `/` and press **Tab** to autocomplete.
 | `/mcp add <name> <cmd> [args]` | Add a stdio MCP server to user config |
 | `/mcp remove <name>` | Remove a server from user config |
 | `/voice` | Record voice, transcribe with Whisper, auto-submit as prompt |
+| `/image [prompt]` | Capture clipboard image and send to vision model with optional prompt |
 | `/voice status` | Show recording and STT backend availability |
 | `/voice lang <code>` | Set STT language (e.g. `zh`, `en`, `ja`; `auto` to detect) |
 | `/proactive` | Show current proactive polling status (ON/OFF and interval) |
