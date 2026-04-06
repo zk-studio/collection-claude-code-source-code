@@ -123,6 +123,7 @@ ClawSpring: **A Lightweight** and **Easy-to-Use** Python Reimplementation of Cla
 
 ## Content
   * [Why ClawSpring](#why-clawspring)
+  * [ClawSpring vs OpenClaw](#clawspring-vs-openclaw)
   * [Features](#features)
   * [Supported Models](#supported-models)
   * [Installation](#installation)
@@ -211,9 +212,71 @@ Claude Code is a powerful, production-grade AI coding assistant — but its sour
 - **Reliable multi-line paste** — Bracketed Paste Mode (`ESC[?2004h`) collects any pasted text — code blocks, multi-paragraph prompts, long diffs — as a single turn with zero latency and no blank-line artifacts.
 - **Rich Tab completion** — Tab after `/` shows all commands with one-line descriptions and subcommand hints; subcommand Tab-complete works for `/mcp`, `/plugin`, `/tasks`, `/cloudsave`, and more.
 
+---
+
+## ClawSpring vs OpenClaw
+
+[OpenClaw](https://github.com/openclaw/openclaw) is another popular open-source AI assistant built on TypeScript/Node.js. The two projects have **different primary goals** — here is how they compare.
+
+### At a glance
+
+| Dimension | OpenClaw (TypeScript) | ClawSpring (Python) |
+|-----------|----------------------|---------------------|
+| Language | TypeScript + Node.js | Python 3.8+ |
+| Source files | ~10,349 TS/JS files | 51 Python files |
+| Lines of code | ~245K | ~12K |
+| Primary focus | Personal life assistant across messaging channels | AI **coding** assistant / developer tool |
+| Architecture | Always-on Gateway daemon + companion apps | Zero-install terminal REPL |
+| Messaging channels | 20+ (WhatsApp · Telegram · Slack · Discord · Signal · iMessage · Matrix · WeChat · …) | Terminal + optional Telegram bridge |
+| Model providers | Multiple (cloud-first) | 7+ including full local support (Ollama · vLLM · LM Studio · …) |
+| Local / offline models | Limited | Full — Ollama, vLLM, any OpenAI-compatible endpoint |
+| Voice | Wake word · PTT · Talk Mode (macOS/iOS/Android) | Offline Whisper STT (local, no API key) |
+| Code editing tools | Browser control, Canvas workspace | Read · Write · Edit · Bash · Glob · Grep · NotebookEdit · GetDiagnostics |
+| Build step required | Yes (`pnpm install` + daemon setup) | No — `pip install` and run |
+| Mobile companion | macOS menu bar + iOS/Android apps | — |
+| Live Canvas / UI | Yes (A2UI agent-driven visual workspace) | — |
+| MCP support | — | Yes (stdio/SSE/HTTP) |
+| Runtime extensibility | Skills platform (bundled/managed/workspace) | `register_tool()` at runtime, MCP, git plugins, Markdown skills |
+| Hackability | Large codebase (245K lines), harder to modify | ~12K lines — full agent loop visible in one file |
+
+### Where OpenClaw wins
+
+- **Omni-channel inbox** — connects to 20+ messaging platforms (WhatsApp, Signal, iMessage, Discord, Teams, Matrix, WeChat…); users interact from wherever they already are.
+- **Always-on daemon** — Gateway runs as a background service (launchd/systemd); no terminal required for day-to-day use.
+- **Mobile-first** — macOS menu bar, iOS Voice Wake / Talk Mode, Android camera/screen recording — feels like a native app, not a CLI tool.
+- **Live Canvas** — agent-driven visual workspace rendered in the browser; supports A2UI push/eval/snapshot.
+- **Browser automation** — dedicated Chrome/Chromium profile with snapshot, actions, and upload tools.
+- **Production reliability** — versioned npm releases, comprehensive CI, onboarding wizard, `openclaw doctor` diagnostics.
+
+### Where ClawSpring wins
+
+- **Coding toolset** — Read/Write/Edit/Bash/Glob/Grep/NotebookEdit/GetDiagnostics are purpose-built for software development; ClawSpring understands diffs, file trees, and code structure.
+- **True local model support** — full Ollama/vLLM/LM Studio integration with streaming, tool-calling, and vision — no cloud required.
+- **7+ model providers** — switch between Claude, GPT-4o, Gemini, DeepSeek, Qwen, and local models with a single `--model` flag.
+- **Hackable in minutes** — 12K lines of readable Python; the entire agent loop is in `agent.py`; extend with `register_tool()` at runtime without rebuilding.
+- **Zero setup** — `pip install clawspring` and run `clawspring`; no daemon, no pairing, no onboarding wizard.
+- **MCP support** — connect any MCP server (stdio/SSE/HTTP); tools auto-registered.
+- **SSJ Developer Mode** — `/ssj` power menu chains Brainstorm → TODO → Worker → Debate in a persistent interactive session; automates entire dev workflows.
+- **Offline voice** — `/voice` transcribes locally with `faster-whisper`; no subscription, no OAuth, works without internet.
+- **Session cloud sync** — `/cloudsave` backs up full conversations to private GitHub Gists with zero extra dependencies.
+
+### When to choose which
+
+| If you want… | Use |
+|---|---|
+| A personal assistant you can message on WhatsApp/Signal/Discord | **OpenClaw** |
+| An AI coding assistant in your terminal | **ClawSpring** |
+| Full offline / local model support | **ClawSpring** |
+| A mobile-friendly always-on experience | **OpenClaw** |
+| To read and modify the source in an afternoon | **ClawSpring** |
+| Browser automation and a visual Canvas | **OpenClaw** |
+| Multi-provider LLM switching without rebuilding | **ClawSpring** |
+
+---
+
 ### Key design differences
 
-**Agent loop** — Nano uses a Python generator that `yield`s typed events (`TextChunk`, `ToolStart`, `ToolEnd`, `TurnDone`). The entire loop is visible in one file, making it easy to add hooks, custom renderers, or logging.
+**Agent loop** — ClawSpring uses a Python generator that `yield`s typed events (`TextChunk`, `ToolStart`, `ToolEnd`, `TurnDone`). The entire loop is visible in one file, making it easy to add hooks, custom renderers, or logging.
 
 **Tool registration** — every tool is a `ToolDef(name, schema, func, read_only, concurrent_safe)` dataclass. Any module can call `register_tool()` at import time; MCP servers, plugins, and skills all use the same mechanism.
 
@@ -226,7 +289,7 @@ Claude Code is a powerful, production-grade AI coding assistant — but its sour
 | Layer 2 | AI summarization | AI summarization of older turns |
 | Control | System-managed | `preserve_last_n_turns` parameter |
 
-**Memory** — Claude Code's `extractMemories` service has the model proactively surface facts. Nano's `memory/` package is tool-driven: the model calls `MemorySave` explicitly, which is more predictable and auditable. Each memory now carries `confidence`, `source`, `last_used_at`, and `conflict_group` metadata; search re-ranks by confidence × recency; and `/memory consolidate` offers a manual consolidation pass without silently modifying memories in the background.
+**Memory** — Claude Code's `extractMemories` service has the model proactively surface facts. ClawSpring's `memory/` package is tool-driven: the model calls `MemorySave` explicitly, which is more predictable and auditable. Each memory now carries `confidence`, `source`, `last_used_at`, and `conflict_group` metadata; search re-ranks by confidence × recency; and `/memory consolidate` offers a manual consolidation pass without silently modifying memories in the background.
 
 ### Who should use ClawSpring
 
@@ -1455,7 +1518,7 @@ export NANO_CLAUDE_WHISPER_MODEL=tiny    # fastest, lightest
 
 ### Keyterm boosting
 
-Before each recording, Nano extracts coding vocabulary from:
+Before each recording, ClawSpring extracts coding vocabulary from:
 - **Git branch** (e.g. `feat/voice-input` → "feat", "voice", "input")
 - **Project root name** (e.g. "clawspring")
 - **Recent source file stems** (e.g. `authentication_handler.py` → "authentication", "handler")
